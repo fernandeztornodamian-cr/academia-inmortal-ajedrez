@@ -107,6 +107,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
+            white-space: nowrap;
         }
 
         .btn-whatsapp {
@@ -116,6 +117,7 @@
 
         .btn-whatsapp:hover {
             background-color: #1faa52;
+            transform: scale(1.05);
         }
 
         .btn-copiar {
@@ -125,6 +127,7 @@
 
         .btn-copiar:hover {
             background-color: #ffed4e;
+            transform: scale(1.05);
         }
 
         .btn-marcar {
@@ -134,6 +137,106 @@
 
         .btn-marcar:hover {
             background-color: #2ecc71;
+            transform: scale(1.05);
+        }
+
+        .btn-marcar:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .contrasena-codigo {
+            background: #f0f0f0;
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .modal-contacto {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-contacto-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-contacto-content h2 {
+            color: #1a1a2e;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: black;
+        }
+
+        .info-bloque {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            border-left: 4px solid #ffd700;
+        }
+
+        .info-bloque p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+
+        .info-bloque strong {
+            color: #1a1a2e;
+        }
+
+        .btn-grupo {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .btn-grupo .btn-action {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                font-size: 0.85rem;
+            }
+
+            .btn-action {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+
+            td {
+                padding: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -198,9 +301,46 @@
         </div>
     </div>
 
+    <!-- Modal de contacto por WhatsApp -->
+    <div id="modalContacto" class="modal-contacto">
+        <div class="modal-contacto-content">
+            <span class="close-modal" onclick="cerrarModalContacto()">&times;</span>
+            <h2>💬 Enviar Mensaje por WhatsApp</h2>
+            
+            <div class="info-bloque">
+                <p><strong>Nombre:</strong> <span id="modalNombre"></span></p>
+                <p><strong>WhatsApp:</strong> <span id="modalWhatsapp"></span></p>
+                <p><strong>Plan:</strong> <span id="modalPlan"></span></p>
+            </div>
+
+            <div class="info-bloque">
+                <p><strong>Contraseña de acceso:</strong></p>
+                <p style="font-size: 1.1rem; font-weight: bold; color: #27ae60;" id="modalContrasena"></p>
+            </div>
+
+            <p style="text-align: center; color: #666; margin: 1rem 0;">
+                Elige cómo quieres enviar el mensaje:
+            </p>
+
+            <div class="btn-grupo">
+                <button class="btn-action btn-whatsapp" onclick="abrirWhatsApp()">
+                    💚 Abrir WhatsApp
+                </button>
+                <button class="btn-action btn-copiar" onclick="copiarMensaje()">
+                    📋 Copiar Mensaje
+                </button>
+            </div>
+
+            <p style="text-align: center; font-size: 0.85rem; color: #999; margin-top: 1rem;">
+                Nota: Después de contactar y confirmar el pago, marca como pagado.
+            </p>
+        </div>
+    </div>
+
     <script>
         // Cargar estudiantes
         let estudiantes = [];
+        let estudianteSeleccionado = null;
 
         function cargarEstudiantes() {
             const data = localStorage.getItem('estudiantes');
@@ -231,12 +371,10 @@
                     <td>${est.nivel}</td>
                     <td><span class="status ${statusClass}">${statusTexto}</span></td>
                     <td>${est.fechaInscripcion}</td>
+                    <td><span class="contrasena-codigo">${est.contrasena}</span></td>
                     <td>
-                        <code style="background: #f0f0f0; padding: 0.3rem 0.6rem; border-radius: 3px; font-size: 0.85rem;">${est.contrasena}</code>
-                    </td>
-                    <td>
-                        <button class="btn-action btn-whatsapp" onclick="abrirWhatsApp('${est.whatsapp}', '${est.nombre}', '${est.contrasena}')">WhatsApp</button>
-                        <button class="btn-action btn-copiar" onclick="copiarContrasena('${est.contrasena}')">Copiar</button>
+                        <button class="btn-action btn-whatsapp" onclick="abrirModalContacto(${index})" title="Enviar mensaje por WhatsApp">💬 Contactar</button>
+                        <button class="btn-action btn-copiar" onclick="copiarContrasena(${index})" title="Copiar contraseña">📋 Copiar</button>
                         <button class="btn-action btn-marcar" onclick="marcarPagado(${index})" ${est.estado === 'pagado' ? 'disabled' : ''}>✓ Pagado</button>
                     </td>
                 </tr>
@@ -259,24 +397,59 @@
             document.getElementById('ingresoTotal').textContent = '$' + ingresos;
         }
 
-        function abrirWhatsApp(whatsapp, nombre, contrasena) {
-            const mensaje = `Hola ${nombre},\n\nTu contraseña de acceso a la Academia Inmortal de Ajedrez es:\n\n🔐 ${contrasena}\n\nPuedes acceder aquí: [link del sitio]\n\n¡Bienvenido a la academia!`;
-            const url = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
+        function abrirModalContacto(index) {
+            estudianteSeleccionado = estudiantes[index];
+            
+            document.getElementById('modalNombre').textContent = estudianteSeleccionado.nombre;
+            document.getElementById('modalWhatsapp').textContent = estudianteSeleccionado.whatsapp;
+            document.getElementById('modalPlan').textContent = estudianteSeleccionado.plan;
+            document.getElementById('modalContrasena').textContent = estudianteSeleccionado.contrasena;
+            
+            document.getElementById('modalContacto').style.display = 'block';
+        }
+
+        function cerrarModalContacto() {
+            document.getElementById('modalContacto').style.display = 'none';
+            estudianteSeleccionado = null;
+        }
+
+        function abrirWhatsApp() {
+            if (!estudianteSeleccionado) return;
+            
+            const mensaje = `Hola ${estudianteSeleccionado.nombre},\n\n¡Bienvenido a la Academia Inmortal de Ajedrez!\n\nTu contraseña de acceso es:\n\n🔐 ${estudianteSeleccionado.contrasena}\n\nPlan: ${estudianteSeleccionado.plan}\n\nPor favor, realiza el pago de $${estudianteSeleccionado.precio} USD para activar tu acceso.\n\nUna vez confirmado el pago, tendrás acceso inmediato a todo el contenido de la academia.\n\n¿Tienes alguna pregunta? Estoy aquí para ayudarte.\n\n¡Que disfrutes tu aprendizaje! ♟️`;
+            
+            const whatsappNumero = estudianteSeleccionado.whatsapp.replace(/\D/g, '');
+            const url = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(mensaje)}`;
+            
             window.open(url, '_blank');
         }
 
-        function copiarContrasena(contrasena) {
+        function copiarMensaje() {
+            if (!estudianteSeleccionado) return;
+            
+            const mensaje = `Hola ${estudianteSeleccionado.nombre},\n\n¡Bienvenido a la Academia Inmortal de Ajedrez!\n\nTu contraseña de acceso es:\n\n🔐 ${estudianteSeleccionado.contrasena}\n\nPlan: ${estudianteSeleccionado.plan}\n\nPor favor, realiza el pago de $${estudianteSeleccionado.precio} USD para activar tu acceso.\n\nUna vez confirmado el pago, tendrás acceso inmediato a todo el contenido de la academia.\n\n¿Tienes alguna pregunta? Estoy aquí para ayudarte.\n\n¡Que disfrutes tu aprendizaje! ♟️`;
+            
+            navigator.clipboard.writeText(mensaje).then(() => {
+                alert('✅ Mensaje copiado al portapapeles. Ahora puedes pegarlo en WhatsApp.');
+            });
+        }
+
+        function copiarContrasena(index) {
+            const contrasena = estudiantes[index].contrasena;
             navigator.clipboard.writeText(contrasena).then(() => {
                 alert('✅ Contraseña copiada al portapapeles');
             });
         }
 
         function marcarPagado(index) {
-            estudiantes[index].estado = 'pagado';
-            localStorage.setItem('estudiantes', JSON.stringify(estudiantes));
-            actualizarTabla();
-            actualizarEstadisticas();
-            alert('✅ Estudiante marcado como pagado');
+            if (confirm('¿Confirmar que este estudiante ya pagó?')) {
+                estudiantes[index].estado = 'pagado';
+                localStorage.setItem('estudiantes', JSON.stringify(estudiantes));
+                actualizarTabla();
+                actualizarEstadisticas();
+                alert('✅ Estudiante marcado como pagado');
+                cerrarModalContacto();
+            }
         }
 
         function exportarDatos() {
@@ -287,6 +460,14 @@
             link.href = url;
             link.download = `estudiantes_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalContacto');
+            if (event.target === modal) {
+                cerrarModalContacto();
+            }
         }
 
         // Cargar al abrir
