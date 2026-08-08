@@ -345,8 +345,66 @@
         function cargarEstudiantes() {
             const data = localStorage.getItem('estudiantes');
             estudiantes = data ? JSON.parse(data) : [];
+            
+            // Si no hay datos, crear datos de ejemplo
+            if (estudiantes.length === 0) {
+                crearDatosEjemplo();
+            }
+            
             actualizarTabla();
             actualizarEstadisticas();
+        }
+
+        function crearDatosEjemplo() {
+            estudiantes = [
+                {
+                    id: 'EST_1696867200000_abc123def',
+                    nombre: 'Carlos López',
+                    email: 'carlos@example.com',
+                    whatsapp: '+1 813 534 3515',
+                    pais: 'Estados Unidos',
+                    nivel: 'intermedio',
+                    experiencia: '3 años',
+                    objetivos: 'Mejorar mi nivel y participar en torneos',
+                    plan: 'Plan Anual ($100 USD)',
+                    precio: 100,
+                    contrasena: 'K8mP9xR2vL5q',
+                    fechaInscripcion: '8/8/2026, 19:30:00',
+                    estado: 'pendiente_pago'
+                },
+                {
+                    id: 'EST_1696867300000_xyz789uvw',
+                    nombre: 'María García',
+                    email: 'maria@example.com',
+                    whatsapp: '+34 612 345 678',
+                    pais: 'España',
+                    nivel: 'principiante',
+                    experiencia: '6 meses',
+                    objetivos: 'Aprender los fundamentos del ajedrez',
+                    plan: 'Plan Mensual ($30 USD)',
+                    precio: 30,
+                    contrasena: 'J7nQ3pW8sM1t',
+                    fechaInscripcion: '8/8/2026, 18:45:00',
+                    estado: 'pagado'
+                },
+                {
+                    id: 'EST_1696867400000_def456ghi',
+                    nombre: 'Juan Martínez',
+                    email: 'juan@example.com',
+                    whatsapp: '+57 300 123 4567',
+                    pais: 'Colombia',
+                    nivel: 'avanzado',
+                    experiencia: '5 años',
+                    objetivos: 'Preparación para maestría',
+                    plan: 'Plan Anual ($100 USD)',
+                    precio: 100,
+                    contrasena: 'H9vL2bR6dF4k',
+                    fechaInscripcion: '8/8/2026, 20:15:00',
+                    estado: 'pendiente_pago'
+                }
+            ];
+            
+            localStorage.setItem('estudiantes', JSON.stringify(estudiantes));
         }
 
         function actualizarTabla() {
